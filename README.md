@@ -39,3 +39,17 @@ rkp-ipid mark_capture=0x40 mark_ramdom=0x80
 还有就是，随机 ID 很吃性能，慎用。
 
 这个模块算是我随便写的，作为 xmurp-ua 的一个衍生物。所以，文档我就不写太多了，一些通用的信息直接去看 xmurp-ua。
+
+------
+
+为Debian编译内核模块
+
+```bash
+sudo apt-get install linux-headers-`uname -r`
+cd src
+make
+
+make clean #清理
+```
+经检测，ipid代码在Debian 11可用。xmurp-ua在Debian 11不能正常使用。现象是内核日志没输出修改UA的包的数量。进一步的实验发现，代码中的*data_start == 0 且 *data_end == 0，因此memcpy无法返回需要的值，可能是新版内核修改了skb的数据结构。
+

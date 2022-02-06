@@ -49,7 +49,7 @@ unsigned int hook_funcion(const struct nf_hook_ops *ops, struct sk_buff *skb, co
 			n_not_writable = 1;
 			printk("rkp-ipid: There is a package not wirtable. Please make sure the router has enough memory.\n");
 		}
-		n_not_writable++;
+		++n_not_writable;
 		return NF_ACCEPT;
 	}
 	
@@ -57,24 +57,24 @@ unsigned int hook_funcion(const struct nf_hook_ops *ops, struct sk_buff *skb, co
 	if(skb -> mark & mark_random)
 	{
 		get_random_bytes(&(iph -> id), 2);
-		n_modified++;
-		n_random++;
+		++n_modified;
+		++n_random;
 	}
 	else
 	{
 		iph -> id = ntohs(id_next);
-		id_next++;
-		n_modified++;
+		++id_next;
+		++n_modified;
 	}
 
 	iph->check = 0;
 	iph->check = ip_fast_csum(iph, iph->ihl);
 
-	if(n_modified_lastprint * 2 == n_modified)
+	if((n_modified_lastprint << 1) == n_modified)
 	{
 		printk("rkp-ipid: Successfully modified %u packages, in which %u IDs are in increasing order, %u IDs are random. There are %u packages not writable.\n",
 				n_modified, n_modified - n_random, n_random, n_not_writable);
-		n_modified_lastprint *= 2;
+		n_modified_lastprint <<= 1;
 	}
 
 	return NF_ACCEPT;
@@ -94,7 +94,7 @@ static int __init hook_init(void)
     ret = nf_register_hook(&nfho);
 #endif
 	get_random_bytes(&(id_next), 2);
-	printk("rkp-ipid: Started, version=%d, mark_capture=0x%x. mark_random=0x%x.\n", VERSION, mark_capture, mark_random);
+	printk("rkp-ipid: Started, mark_capture=0x%x. mark_random=0x%x.\n", mark_capture, mark_random);
 	printk("rkp-ipid: nf_register_hook returnd %d.\n", ret);
 
 	return 0;
